@@ -11,6 +11,10 @@ export const ListMissions = (missions: Mission[], args: any) => {
           a = aMission.title;
           b = bMission.title;
           break;
+        case "Operator":
+          a = aMission.operator;
+          b = bMission.operator;
+          break;
         case "Date":
           a = new Date(aMission.launch.date);
           b = new Date(bMission.launch.date);

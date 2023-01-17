@@ -38,7 +38,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import { ListMenu } from "../components/ListMenu";
 
-type SortField = "Title" | "Date";
+type SortField = "Title" | "Date" | "Operator" ;//I added the "operator" option.
 
 interface MissionsResponse {
   data: {
@@ -56,6 +56,7 @@ const getMissions = async (
     Missions(
       sort: {
         field: ${sortField}
+        desc: ${sortDesc}  
       }
     ) {
       id
@@ -70,7 +71,7 @@ const getMissions = async (
     []
   );
 };
-
+// *point 3 ex 1* I added line 59 {  desc: ${sortDesc}  }
 const Missions = (): JSX.Element => {
   const [missions, setMissions] = useState<Mission[] | null>(null);
   const [newMissionOpen, setNewMissionOpen] = useState(false);
@@ -105,7 +106,7 @@ const Missions = (): JSX.Element => {
   };
 
   useEffect(() => {
-    getMissions(sortField)
+    getMissions(sortField,sortDesc)// *point 2 ex 1* I added that the function also sends the argument {sortDesc}.
       .then((result: MissionsResponse) => {
         setMissions(result.data.Missions);
       })
@@ -113,7 +114,7 @@ const Missions = (): JSX.Element => {
         setErrMessage("Failed to load missions.");
         console.log(err);
       });
-  }, [sortField]);
+  }, [sortField,sortDesc]);// *point 1 ex 1* I added {,sortDesc} to the [] in the hook-func useEffect.
 
   return (
     <AppLayout title="Missions">
@@ -128,7 +129,7 @@ const Missions = (): JSX.Element => {
               <FilterAltIcon />
             </IconButton>
             <ListMenu
-              options={["Date", "Title"]}
+              options={["Date", "Title","Operator"]}//I added the "operator" option.
               endIcon={<SortIcon />}
               onSelectionChange={handleSortFieldChange}
             />
@@ -149,7 +150,7 @@ const Missions = (): JSX.Element => {
                     subheader={new Date(missions.launch.date).toDateString()}
                   />
                   <CardContent>
-                    <Typography noWrap>{missions.operator}</Typography>
+                    <Typography  noWrap>{missions.operator}</Typography>
                   </CardContent>
                   <CardActions>
                     <Button>Edit</Button>

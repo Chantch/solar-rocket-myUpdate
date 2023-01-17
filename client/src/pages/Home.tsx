@@ -13,7 +13,9 @@ const Home = (): JSX.Element => {
   }, []);
 
   return (
+    
     <AppLayout>
+      <div> Home here...</div>
       <Container maxWidth="lg">
         {readmeContent ? (
           <ReactMarkdown linkTarget="_blank" components={{code({children, ...props}){

@@ -46,6 +46,8 @@ input MissionSortOptions {
 enum MissionSortFields {
   Title
   Date
+  Operator
+
 }
 
 type Mission {
@@ -79,5 +81,12 @@ type Payload {
   capacity: Int!
   available: Int!
 }
+
+type Delivery {
+ id:ID
+ date: Date
+ size: Int!
+}
+
 
 scalar DateTime

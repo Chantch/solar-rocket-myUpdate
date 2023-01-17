@@ -36,7 +36,7 @@ To fix the issue, try adding the following line to the `/client/.env`:
 
 1. On the "Missions" page you can currently you can sort the data by "Title" or "Date". The "sort direction" button does not work. Make it work so that when clicking the sort button, the order of the sorting is reversed.
 1. Add the ability to sort missions by "operator".
-1. The fuel deliveries page currently has no content. We need to show the details of upcoming fuel deliveries on this page. Use the [Solar Rocket Fuel Deliveries API](https://benmanage.github.io/solar-rocket/#solar-rocket-fuel-api) to pull the fuel delivery data. Make it look pretty.
+1. The fuel deliveries page currently has no content. We need to show the details of upcoming fuel deliveries on this page. Use the [Solar Rocket Fuel Deliveries API](https://github.com/BenManage/solar-rocket/blob/main/API.md) to pull the fuel delivery data. Make it look pretty.
 1. Someone started creating a dialog to create new missions, but they never finished it (and it doesn't even have the right fields). Update the dialog to create new missions with the necessary data and use the API to save the data so it shows up on the missions page.
 
 ## Extra Credit (if you really want to impress us 😊)
