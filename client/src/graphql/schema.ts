@@ -29,4 +29,17 @@ export type Payload = {
   capacity: Number;
   available: Number;
 }
+export type DeliveriesType = {
+   date: Date,
+  deliveries:  Delivery []
+}
 
+export type Delivery = {
+  type: string,
+  quantity: number,
+  unit: string,
+  icon: string
+}
+export type Dd = {
+  deliveryDates:Date[]
+}

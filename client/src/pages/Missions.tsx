@@ -1,6 +1,7 @@
-import { SyntheticEvent, useEffect, useState } from "react";
+import { ReactEventHandler, SyntheticEvent, useEffect, useState } from "react";
 import { AppLayout } from "../layouts/AppLayout";
 import fetchGraphQL from "../graphql/GraphQL";
+import * as React from 'react';
 import { Mission } from "../graphql/schema";
 import {
   Card,
@@ -24,6 +25,8 @@ import {
   Alert,
   Box,
   CircularProgress,
+  Divider,
+  FormControl,
 } from "@mui/material";
 
 import {
@@ -32,13 +35,14 @@ import {
   Sort as SortIcon,
   ArrowDownward as ArrowDownwardIcon,
   ArrowUpward as ArrowUpwardIcon,
+  Label,
 } from "@mui/icons-material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
 import { ListMenu } from "../components/ListMenu";
+import { ObjectFlags } from "typescript";
 
-type SortField = "Title" | "Date" | "Operator" ;//I added the "operator" option.
+type SortField = "Title" | "Date" | "Operator";
 
 interface MissionsResponse {
   data: {
@@ -56,7 +60,8 @@ const getMissions = async (
     Missions(
       sort: {
         field: ${sortField}
-        desc: ${sortDesc}  
+        desc: ${sortDesc}
+
       }
     ) {
       id
@@ -71,15 +76,61 @@ const getMissions = async (
     []
   );
 };
-// *point 3 ex 1* I added line 59 {  desc: ${sortDesc}  }
+
+
+const postNewMissions = async (values: Mission | null): Promise<MissionsResponse> => {
+  const missionsArr: Mission[] = [];
+  if (values) { missionsArr.push(values) }
+  return await fetchGraphQL(
+    `
+  {
+    Missions()
+     {
+      id
+      title
+      operator
+      launch {
+        date
+        vehicle
+        location
+        {
+          name
+          longitude
+          Latitude
+        }
+        orbit{
+          periapsis
+          apoapsis
+          inclination
+        }
+        Payload
+        {
+          capacity
+          available
+        }
+      }
+    }
+  }
+  `,
+    // missionsArr
+    [values]
+  );
+};
+
 const Missions = (): JSX.Element => {
   const [missions, setMissions] = useState<Mission[] | null>(null);
   const [newMissionOpen, setNewMissionOpen] = useState(false);
+  const [newMission, setNewMission] = useState<Mission| null>(null);
   const [tempLaunchDate, setTempLaunchDate] = useState<Date | null>(null);
   const [sortDesc, setSortDesc] = useState<boolean>(false);
   const [sortField, setSortField] = useState<SortField>("Title");
   const [errMessage, setErrMessage] = useState<String | null>(null);
+  // const [name, setName] = React.useState('Cat in the Hat');
 
+  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setName(event.target.value);
+  //   alert(name);
+  // };
   const handleErrClose = (event?: SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") return;
     setErrMessage(null);
@@ -88,10 +139,37 @@ const Missions = (): JSX.Element => {
   const handleNewMissionOpen = () => {
     setTempLaunchDate(null);
     setNewMissionOpen(true);
+    
   };
 
   const handleNewMissionClose = () => {
     setNewMissionOpen(false);
+  };
+  const handleTextFieldChange = (event:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
+    const{name,value}=event.target;
+    setNewMission({
+      id: "212328702",
+      title: 'chani',
+      operator: 'String',
+      launch: {
+        date: new Date(),
+        vehicle: 'String',
+        location: {
+          name: 'String',
+          longitude: 0,
+          Latitude: 0
+        },
+      },
+      orbit: {
+        periapsis: 0,
+        apoapsis: 0,
+        inclination: 0
+      },
+      payload: {
+        capacity: 0,
+        available: 0
+      }
+    });
   };
 
   const handleTempLaunchDateChange = (newValue: Date | null) => {
@@ -104,9 +182,44 @@ const Missions = (): JSX.Element => {
   const handleSortDescClick = () => {
     setSortDesc(!sortDesc);
   };
+  const hundleNewMission = () => {
+    // newMissions.push(newMission);
+    // var a = document.getElementsByClassName('id*');
+      setNewMission({
+        id: "212328702",
+        title: 'duparc',
+        operator: 'String',
+        launch: {
+          date: new Date(),
+          vehicle: 'String',
+          location: {
+            name: 'String',
+            longitude: 0,
+            Latitude: 0
+          },
+        },
+        orbit: {
+          periapsis: 0,
+          apoapsis: 0,
+          inclination: 0
+        },
+        payload: {
+          capacity: 1,
+          available:1
+        }
+      })
+      // alert(newMission?.id)
+      debugger
+
+    // setNewMission(a);
+    postNewMissions(newMission).then(() => { console.log("המשימה נשלחה לשמירה") })
+
+    handleNewMissionClose();
+
+  };
 
   useEffect(() => {
-    getMissions(sortField,sortDesc)// *point 2 ex 1* I added that the function also sends the argument {sortDesc}.
+    getMissions(sortField, sortDesc)
       .then((result: MissionsResponse) => {
         setMissions(result.data.Missions);
       })
@@ -114,7 +227,7 @@ const Missions = (): JSX.Element => {
         setErrMessage("Failed to load missions.");
         console.log(err);
       });
-  }, [sortField,sortDesc]);// *point 1 ex 1* I added {,sortDesc} to the [] in the hook-func useEffect.
+       }, [sortField, sortDesc]);
 
   return (
     <AppLayout title="Missions">
@@ -129,9 +242,10 @@ const Missions = (): JSX.Element => {
               <FilterAltIcon />
             </IconButton>
             <ListMenu
-              options={["Date", "Title","Operator"]}//I added the "operator" option.
+              options={["Date", "Title", "Operator"]}
               endIcon={<SortIcon />}
               onSelectionChange={handleSortFieldChange}
+
             />
             <IconButton onClick={handleSortDescClick}>
               {sortDesc ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
@@ -150,7 +264,7 @@ const Missions = (): JSX.Element => {
                     subheader={new Date(missions.launch.date).toDateString()}
                   />
                   <CardContent>
-                    <Typography  noWrap>{missions.operator}</Typography>
+                    <Typography noWrap>{missions.operator}</Typography>
                   </CardContent>
                   <CardActions>
                     <Button>Edit</Button>
@@ -184,25 +298,46 @@ const Missions = (): JSX.Element => {
           <DialogTitle>New Mission</DialogTitle>
           <DialogContent>
             <Grid container direction="column" spacing={2}>
-              <Grid item>
-                <TextField
-                  autoFocus
-                  id="name"
-                  label="Name"
-                  variant="standard"
-                  fullWidth
-                />
-              </Grid>
-              <Grid item>
-                <TextField
-                  autoFocus
-                  id="desc"
-                  label="Description"
-                  variant="standard"
-                  fullWidth
-                />
-              </Grid>
 
+              <Grid item>
+                <TextField
+                focused
+                  autoFocus
+                  id="id1"
+                  label="id"
+                  variant="standard"
+                  fullWidth
+                  // on={handleChange}
+                // onChange={(event)=>{newMission?.id==event.target.value;setNewMission(newMission)}}
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="id2"
+                  label="title"
+                  variant="standard"
+                  fullWidth
+                // onChange={(event)=>{newMission?.title==event.target.value;setNewMission(newMission)}}
+                />
+               
+              </Grid>
+              
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="id3"
+                  label="operator"
+                  variant="standard"
+                  fullWidth
+                // onChange={(event)=>{newMission?.operator==event.target.value;setNewMission(newMission)}}
+                />
+              </Grid>
+            </Grid>
+            <br></br>
+            <h3>lunch</h3>
+            <Grid container direction="column" spacing={2}>
+              {/* <Label>lunch</Label> */}
               <Grid item>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DateTimePicker
@@ -212,16 +347,141 @@ const Missions = (): JSX.Element => {
                     value={tempLaunchDate}
                     onChange={handleTempLaunchDateChange}
                     renderInput={(params) => (
-                      <TextField variant="standard" {...params} />
+                      <TextField variant="standard" {...params}
+                      // onChange={(event)=>{newMission?.launch.date.toString()==event.target.value;setNewMission(newMission)}}
+                      />
                     )}
                   />
                 </LocalizationProvider>
               </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="vehicle"
+                  label="vehicle"
+                  variant="standard"
+                  fullWidth
+                // onChange={(event)=>{newMission?.launch.vehicle==event.target.value;setNewMission(newMission)}}
+                />
+              </Grid></Grid>
+            <br></br>
+            <h3>Locatin</h3>
+            <Grid container direction="column" spacing={2} >
+              {/* <Label> Locatin</Label> */}
+
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="loc"
+                  label="location name"
+                  variant="standard"
+                  fullWidth
+                // onChange={(event)=>{newMission?.launch.location.name==event.target.value;setNewMission(newMission)}}
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="Lati"
+                  label="Latitude"
+                  variant="standard"
+                  fullWidth
+                  type={"number"}
+                // onChange={(event)=>{newMission?.launch.location.Latitude.toString()==event.target.value;setNewMission(newMission)}}
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="longi"
+                  label="longitude"
+                  variant="standard"
+                  fullWidth
+                  type={"number"}
+                // onChange={(event)=>{newMission?.launch.location.longitude.toString()==event.target.value;setNewMission(newMission)}}
+                />
+              </Grid>
             </Grid>
+            <br></br>
+            <h3>orbit</h3>
+            <Grid container direction="column" spacing={2} >
+              {/* <Label>orbit</Label> */}
+
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="peria"
+                  label="periapsis"
+                  variant="standard"
+                  fullWidth
+                  type={"number"}
+                // onChange={(event)=>{newMission?.orbit.periapsis.toString()==event.target.value;setNewMission(newMission)}}
+
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="apoa"
+                  label="apoapsis"
+                  variant="standard"
+                  fullWidth
+                  type={"number"}
+                // onChange={(event)=>{newMission?.orbit.apoapsis.toString()==event.target.value;setNewMission(newMission)}}
+
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="inclin"
+                  label="inclination"
+                  variant="standard"
+                  fullWidth
+                  type={"number"}
+                // onChange={(event)=>{newMission?.orbit.inclination.toString()==event.target.value;setNewMission(newMission)}}
+
+                />
+              </Grid>
+            </Grid>
+            <br></br>
+            <h3>payload</h3>
+            <Grid container direction="column" spacing={2} >
+              {/* <Label>payload</Label> */}
+
+              <Box></Box>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="capacity"
+                  label="capacity"
+                  variant="standard"
+                  fullWidth
+                  type={"number"}
+                // onChange={(event)=>{newMission?.payload.capacity.toString()==event.target.value;setNewMission(newMission)}}
+
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  autoFocus
+                  id="available"
+                  label="available"
+                  variant="standard"
+                  type={"number"}
+                  fullWidth
+                // onChange={(event)=>{newMission?.payload.available.toString()==event.target.value;setNewMission(newMission)}}
+
+                />
+              </Grid>
+
+
+            </Grid>
+            <br></br>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleNewMissionClose}>Cancel</Button>
-            <Button onClick={handleNewMissionClose}>Save</Button>
+            <Button onClick={hundleNewMission}>Save</Button>
           </DialogActions>
         </Dialog>
       </Container>
@@ -240,3 +500,5 @@ const Missions = (): JSX.Element => {
 };
 
 export { Missions };
+
+

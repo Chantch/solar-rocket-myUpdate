@@ -84,7 +84,7 @@ type Payload {
 
 type Delivery {
  id:ID
- date: Date
+ # date: Date
  size: Int!
 }
 

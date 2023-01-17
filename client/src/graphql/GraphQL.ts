@@ -7,11 +7,15 @@ const fetchGraphQL = async (text: String, variables: any[]) => {
       variables,
     }),
   });
-
+  
   if(response.ok)
     return await response.json();
-
-  throw(await response.json());
+    else{
+    alert(response.status)
+  throw(await response.json());}
+  
 };
 
 export default fetchGraphQL;
+
+
